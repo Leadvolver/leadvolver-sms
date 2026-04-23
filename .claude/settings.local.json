@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(sudo rm *)",
+      "Bash(node *)",
+      "Bash(curl -s http://localhost:3000/api/leads/stats)",
+      "Bash(pkill -f \"node ./server/server\")",
+      "Bash(printf 'name,phone,job_type,quote_amount\\\\n\"John Smith\",5551234567,Kitchen Remodel,$12000\\\\n\"Jane Doe\",5559876543,Bathroom,$8500\\\\n')",
+      "Bash(curl -s -F \"csv=@/tmp/test.csv\" http://localhost:3000/api/leads/import)",
+      "Bash(curl -s http://localhost:3000/api/campaign)",
+      "Bash(pkill -f \"node -e\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Campaign saved:', d['persona_name'], '@', d['company_name']\\)\")",
+      "Bash(curl -s http://localhost:3000/api/campaign/preview)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Prompt:', d['prompt'][:80]+'...'\\)\")",
+      "Bash(curl -s -X PATCH http://localhost:3000/api/leads/1/optout)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Opt-out:', d\\)\" pkill -f \"node -e\")"
+    ]
+  }
+}

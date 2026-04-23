@@ -1,0 +1,24 @@
+{
+  "name": "sms-lead-reactivation",
+  "version": "1.0.0",
+  "description": "AI SMS Lead Reactivation Platform",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "nodemon server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^11.10.0",
+    "twilio": "^5.0.3",
+    "openai": "^4.28.0",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.4.1",
+    "csv-parse": "^5.5.3",
+    "multer": "^2.0.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
