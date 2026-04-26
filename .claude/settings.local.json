@@ -14,7 +14,10 @@
       "Bash(curl -s http://localhost:3000/api/campaign/preview)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Prompt:', d['prompt'][:80]+'...'\\)\")",
       "Bash(curl -s -X PATCH http://localhost:3000/api/leads/1/optout)",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Opt-out:', d\\)\" pkill -f \"node -e\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Opt-out:', d\\)\" pkill -f \"node -e\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
