@@ -5,8 +5,116 @@ const state = {
   currentView: 'leads',
   selectedLeadId: null,
   convPollTimer: null,
-  threadPollTimer: null
+  threadPollTimer: null,
+  demo: false,
+  demoData: null
 };
+
+/* ─── Demo Data ───────────────────────────────────────────────── */
+const DEMO_LEADS = [
+  { id: 1001, name: 'James Miller',   phone: '+1 (555) 012-3456', job_type: 'Kitchen Renovation',   quote_amount: '$18,500', status: 'Booked',    opted_out: false },
+  { id: 1002, name: 'Sarah Thompson', phone: '+1 (555) 023-4567', job_type: 'Bathroom Remodel',     quote_amount: '$9,200',  status: 'Hot',       opted_out: false },
+  { id: 1003, name: 'Robert Garcia',  phone: '+1 (555) 034-5678', job_type: 'Full Home Renovation', quote_amount: '$47,000', status: 'Hot',       opted_out: false },
+  { id: 1004, name: 'Emily Chen',     phone: '+1 (555) 045-6789', job_type: 'Kitchen Renovation',   quote_amount: '$22,000', status: 'Replied',   opted_out: false },
+  { id: 1005, name: 'Marcus Johnson', phone: '+1 (555) 056-7890', job_type: 'Basement Finishing',   quote_amount: '$31,000', status: 'Replied',   opted_out: false },
+  { id: 1006, name: 'Amanda Wilson',  phone: '+1 (555) 067-8901', job_type: 'Bathroom Remodel',     quote_amount: '$11,500', status: 'Active',    opted_out: false },
+  { id: 1007, name: 'David Martinez', phone: '+1 (555) 078-9012', job_type: 'Roof Replacement',     quote_amount: '$14,000', status: 'Active',    opted_out: false },
+  { id: 1008, name: 'Jessica Brown',  phone: '+1 (555) 089-0123', job_type: 'Full Home Renovation', quote_amount: '$58,000', status: 'Active',    opted_out: false },
+  { id: 1009, name: 'Kevin Taylor',   phone: '+1 (555) 090-1234', job_type: 'Kitchen Renovation',   quote_amount: '$16,800', status: 'Opted Out', opted_out: true  },
+  { id: 1010, name: 'Lisa Anderson',  phone: '+1 (555) 001-2345', job_type: 'Bathroom Remodel',     quote_amount: '$7,500',  status: 'Active',    opted_out: false },
+];
+
+function buildDemoData() {
+  const now = Date.now();
+  const H = 3600000;
+  const ago = ms => new Date(now - ms).toISOString();
+
+  const threads = {
+    1001: {
+      lead: { id: 1001, name: 'James Miller', phone: '+1 (555) 012-3456', status: 'Booked', ai_paused: false },
+      messages: [
+        { direction: 'outbound', content: "Hi James, this is Maya from ProReno. You reached out a while back about a kitchen renovation. Are you still looking to get that done?", sent_at: ago(72 * H) },
+        { direction: 'inbound',  content: "Hey yeah actually we were just talking about this last week", sent_at: ago(70 * H) },
+        { direction: 'outbound', content: "That's great timing James. A lot of homeowners in your area are booking for this quarter. Would a quick 15 minute call work this week to go over your project?", sent_at: ago(69.5 * H) },
+        { direction: 'inbound',  content: "Sure I can do Thursday afternoon", sent_at: ago(48 * H) },
+        { direction: 'outbound', content: "Perfect. I'll book you in for Thursday at 2pm. You'll get a confirmation shortly. Looking forward to it!", sent_at: ago(47 * H) },
+        { direction: 'inbound',  content: "Sounds good thanks", sent_at: ago(2 * H) },
+      ]
+    },
+    1002: {
+      lead: { id: 1002, name: 'Sarah Thompson', phone: '+1 (555) 023-4567', status: 'Hot', ai_paused: false },
+      messages: [
+        { direction: 'outbound', content: "Hi Sarah, this is Maya from ProReno. You inquired about a bathroom remodel a few months back. Is that still something you're looking into?", sent_at: ago(56 * H) },
+        { direction: 'inbound',  content: "Yes actually we still want to do it we just got busy", sent_at: ago(54 * H) },
+        { direction: 'outbound', content: "Totally understandable. Would it help to jump on a quick call this week to see what's possible within your budget?", sent_at: ago(53.5 * H) },
+        { direction: 'inbound',  content: "Yeah that could work what days do you have", sent_at: ago(50 * H) },
+      ]
+    },
+    1003: {
+      lead: { id: 1003, name: 'Robert Garcia', phone: '+1 (555) 034-5678', status: 'Hot', ai_paused: false },
+      messages: [
+        { direction: 'outbound', content: "Hi Robert, Maya here from ProReno. You reached out about a full home renovation. Still on your radar?", sent_at: ago(30 * H) },
+        { direction: 'inbound',  content: "Honestly yes we have been putting it off but we need to get it done before summer", sent_at: ago(28 * H) },
+        { direction: 'outbound', content: "Smart thinking, summer is when most contractors get fully booked. Want to lock in a quick call so we can go over scope and pricing before spots fill up?", sent_at: ago(27.5 * H) },
+        { direction: 'inbound',  content: "Let's do it yes", sent_at: ago(26 * H) },
+      ]
+    },
+    1004: {
+      lead: { id: 1004, name: 'Emily Chen', phone: '+1 (555) 045-6789', status: 'Replied', ai_paused: false },
+      messages: [
+        { direction: 'outbound', content: "Hi Emily, this is Maya from ProReno. You inquired about a kitchen renovation a while back. Still interested?", sent_at: ago(28 * H) },
+        { direction: 'inbound',  content: "Hi yes I remember, we are still thinking about it", sent_at: ago(27 * H) },
+        { direction: 'outbound', content: "No worries at all. Are there any questions I can answer to help you move forward?", sent_at: ago(26.5 * H) },
+        { direction: 'inbound',  content: "We are mainly wondering about timeline and cost", sent_at: ago(24 * H) },
+      ]
+    },
+    1005: {
+      lead: { id: 1005, name: 'Marcus Johnson', phone: '+1 (555) 056-7890', status: 'Replied', ai_paused: false },
+      messages: [
+        { direction: 'outbound', content: "Hey Marcus, Maya from ProReno here. You reached out about finishing your basement. Still something you want to do?", sent_at: ago(8 * H) },
+        { direction: 'inbound',  content: "Yeah we do, been sitting on it for a while", sent_at: ago(7 * H) },
+        { direction: 'outbound', content: "Totally get it. These projects take planning. Want to set up a quick call so we can map out what it would look like for your space?", sent_at: ago(6.5 * H) },
+        { direction: 'inbound',  content: "Sure send me some times", sent_at: ago(4 * H) },
+      ]
+    }
+  };
+
+  const convList = Object.values(threads).map(t => {
+    const last = t.messages[t.messages.length - 1];
+    return {
+      id: t.lead.id,
+      name: t.lead.name,
+      status: t.lead.status,
+      last_message: last.content,
+      last_direction: last.direction,
+      last_activity: last.sent_at
+    };
+  }).sort((a, b) => new Date(b.last_activity) - new Date(a.last_activity));
+
+  return { threads, convList };
+}
+
+function enterDemoMode() {
+  state.demo = true;
+  state.demoData = buildDemoData();
+  state.selectedLeadId = null;
+  document.getElementById('demo-banner').style.display = 'flex';
+  document.body.classList.add('demo-active');
+  const badge = document.getElementById('conv-badge');
+  if (badge) { badge.textContent = '2'; badge.style.display = 'inline-block'; }
+  switchView('leads');
+}
+
+function exitDemoMode() {
+  state.demo = false;
+  state.demoData = null;
+  state.selectedLeadId = null;
+  document.getElementById('demo-banner').style.display = 'none';
+  document.body.classList.remove('demo-active');
+  const badge = document.getElementById('conv-badge');
+  if (badge) badge.style.display = 'none';
+  switchView('leads');
+}
 
 /* ─── Toast ───────────────────────────────────────────────────── */
 function toast(msg, type = 'success') {
@@ -60,7 +168,7 @@ function switchView(view) {
   if (state.threadPollTimer) { clearInterval(state.threadPollTimer); state.threadPollTimer = null; }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item[data-view]').forEach(b => b.classList.remove('active'));
 
   document.getElementById(`view-${view}`).classList.add('active');
   document.querySelector(`[data-view="${view}"]`).classList.add('active');
@@ -77,6 +185,15 @@ function switchView(view) {
    VIEW 1: LEADS
    ────────────────────────────────────────────────────────────── */
 async function initLeadsView() {
+  if (state.demo) {
+    state.leads = DEMO_LEADS;
+    applyLeadFilters();
+    document.getElementById('stat-total').textContent  = '10';
+    document.getElementById('stat-active').textContent = '5';
+    document.getElementById('stat-hot').textContent    = '2';
+    document.getElementById('stat-booked').textContent = '1';
+    return;
+  }
   await Promise.all([loadLeads(), loadStats()]);
 }
 
@@ -164,6 +281,7 @@ function statusBadge(status) {
 }
 
 async function toggleOptOut(id) {
+  if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); await initLeadsView(); return; }
   try {
     const result = await api('PATCH', `/api/leads/${id}/optout`);
     const lead = state.leads.find(l => l.id == id);
@@ -181,6 +299,7 @@ async function toggleOptOut(id) {
 }
 
 async function handleCsvUpload(file) {
+  if (state.demo) { toast('Demo mode — CSV import disabled.', 'info'); return; }
   if (!file) return;
   if (!file.name.toLowerCase().endsWith('.csv')) {
     return toast('Please upload a .csv file.', 'error');
@@ -202,6 +321,7 @@ async function handleCsvUpload(file) {
 }
 
 async function launchCampaign() {
+  if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
   const confirmed = confirm(
     'Launch campaign now? This will send the initial SMS to all Pending and Active leads immediately.'
   );
@@ -260,7 +380,7 @@ async function updatePromptPreview() {
   try {
     const data = await api('GET', '/api/campaign/preview');
     const el = document.getElementById('prompt-preview');
-    if (el) el.textContent = data.prompt || 'Fill in the persona name and company name to see the preview.';
+    if (el) el.textContent = data.prompt || 'Fill in the persona name and company name to see the prompt preview.';
   } catch (_) {}
 }
 
@@ -295,6 +415,13 @@ async function saveCampaign() {
    VIEW 3: CONVERSATIONS
    ────────────────────────────────────────────────────────────── */
 async function initConversationsView() {
+  if (state.demo) {
+    const { convList } = state.demoData;
+    renderConvList(convList);
+    const badge = document.getElementById('conv-badge');
+    if (badge) { badge.textContent = '2'; badge.style.display = 'inline-block'; }
+    return;
+  }
   await loadConversations();
   state.convPollTimer = setInterval(loadConversations, 5000);
 }
@@ -362,10 +489,18 @@ async function selectConversation(leadId) {
   if (state.threadPollTimer) { clearInterval(state.threadPollTimer); state.threadPollTimer = null; }
 
   await loadThread(leadId);
-  state.threadPollTimer = setInterval(() => loadThread(leadId), 4000);
+
+  if (!state.demo) {
+    state.threadPollTimer = setInterval(() => loadThread(leadId), 4000);
+  }
 }
 
 async function loadThread(leadId) {
+  if (state.demo) {
+    const thread = state.demoData.threads[leadId];
+    if (thread) renderThread(thread.lead, thread.messages);
+    return;
+  }
   try {
     const data = await api('GET', `/api/conversations/${leadId}`);
     renderThread(data.lead, data.messages);
@@ -408,6 +543,7 @@ function renderThreadHeader(lead) {
   `;
 
   el.querySelector('#takeover-btn')?.addEventListener('click', async (e) => {
+    if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
     const btn = e.currentTarget;
     try {
       const result = await api('POST', `/api/conversations/${btn.dataset.id}/takeover`);
@@ -417,6 +553,7 @@ function renderThreadHeader(lead) {
   });
 
   el.querySelector('#book-btn')?.addEventListener('click', async (e) => {
+    if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
     const btn = e.currentTarget;
     if (btn.disabled) return;
     try {
@@ -446,7 +583,7 @@ function renderThreadMessages(messages) {
       <div class="msg-bubble msg-${m.direction}">
         ${esc(m.content)}
       </div>
-      <div class="msg-meta">${m.direction === 'outbound' ? 'AI / You' : 'Lead'} · ${formatTime(m.sent_at)}</div>
+      <div class="msg-meta ${m.direction === 'outbound' ? 'msg-meta-right' : ''}">${m.direction === 'outbound' ? 'AI / You' : 'Lead'} · ${formatTime(m.sent_at)}</div>
     </div>
   `).join('');
 
@@ -491,6 +628,7 @@ function renderThreadActions(lead) {
 }
 
 async function sendManualReply(leadId, textarea) {
+  if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
   const content = textarea.value.trim();
   if (!content) return;
 
@@ -621,9 +759,16 @@ function formatTime(iso) {
 
 /* ─── Init ────────────────────────────────────────────────────── */
 function init() {
-  document.querySelectorAll('.nav-item').forEach(btn => {
+  document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
     btn.addEventListener('click', () => switchView(btn.dataset.view));
   });
+
+  document.getElementById('demo-btn').addEventListener('click', () => {
+    if (state.demo) exitDemoMode();
+    else enterDemoMode();
+  });
+
+  document.getElementById('exit-demo-btn').addEventListener('click', exitDemoMode);
 
   document.getElementById('csv-upload').addEventListener('change', e => {
     handleCsvUpload(e.target.files[0]);
