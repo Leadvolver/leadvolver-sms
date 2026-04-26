@@ -48,6 +48,17 @@ db.exec(`
 
   INSERT OR IGNORE INTO campaign_config (id) VALUES (1);
 
+  CREATE TABLE IF NOT EXISTS blogs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    excerpt TEXT DEFAULT '',
+    content TEXT NOT NULL,
+    author TEXT DEFAULT 'LEADVOLVER',
+    published INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE TABLE IF NOT EXISTS follow_up_schedule (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lead_id INTEGER NOT NULL,

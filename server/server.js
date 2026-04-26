@@ -16,6 +16,7 @@ app.use('/api/leads',          require('./routes/leads'));
 app.use('/api/campaign',       require('./routes/campaign'));
 app.use('/api/conversations',  require('./routes/conversations'));
 app.use('/api/settings',       require('./routes/settings'));
+app.use('/api/blog',           require('./routes/blog'));
 
 app.post('/twilio/webhook', (req, res) => {
   res.type('text/xml').send('<Response></Response>');
@@ -93,6 +94,10 @@ async function handleInboundSMS(phone, body) {
     console.error(`[Webhook] AI/SMS error for ${lead.name}:`, err.message);
   }
 }
+
+app.get('/blog', (req, res) => res.sendFile(path.join(__dirname, '../public/blog.html')));
+app.get('/blog/:slug', (req, res) => res.sendFile(path.join(__dirname, '../public/blog-post.html')));
+app.get('/admin/blog', (req, res) => res.sendFile(path.join(__dirname, '../public/admin-blog.html')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));

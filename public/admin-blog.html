@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog Admin — LEADVOLVER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0a; --surface1: #141414; --surface2: #1a1a1a; --surface3: #202020;
+      --border: #2a2a2a; --border2: #333; --text: #ffffff; --text2: #a0a0a0; --text3: #666;
+      --accent: #b8f73e; --red: #ff4545; --radius: 4px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+    /* Auth screen */
+    .auth-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .auth-box { background: var(--surface1); border: 1px solid var(--border); border-radius: 8px; padding: 40px; width: 100%; max-width: 360px; }
+    .auth-box h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .auth-box p { color: var(--text3); font-size: 13px; margin-bottom: 24px; }
+    .auth-error { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+    /* Admin layout */
+    .admin-wrap { max-width: 900px; margin: 0 auto; padding: 40px 32px 80px; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .admin-header h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+    .admin-header-links { display: flex; gap: 16px; align-items: center; }
+    .admin-header-links a { color: var(--text2); text-decoration: none; font-size: 13px; }
+    .admin-header-links a:hover { color: var(--text); }
+
+    /* Form */
+    .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+    .form-card { background: var(--surface1); border: 1px solid var(--border); border-radius: 8px; padding: 28px; margin-bottom: 40px; }
+    .form-grid { display: flex; flex-direction: column; gap: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius);
+      color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; padding: 10px 12px;
+      outline: none; transition: border-color 0.15s; resize: vertical;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { min-height: 220px; line-height: 1.7; }
+    .hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text3); }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid transparent; padding: 6px 10px; font-size: 12px; }
+    .btn-danger:hover { border-color: var(--red); }
+    .form-actions { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
+    .status-msg { font-size: 13px; color: var(--accent); }
+    .status-msg.error { color: var(--red); }
+
+    /* Posts list */
+    .posts-list { display: flex; flex-direction: column; gap: 12px; }
+    .post-item { background: var(--surface1); border: 1px solid var(--border); border-radius: 6px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .post-item-info { flex: 1; min-width: 0; }
+    .post-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .post-item-meta { font-size: 12px; color: var(--text3); margin-top: 3px; }
+    .post-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .badge-draft { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: var(--surface3); color: var(--text3); padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+    .empty-posts { color: var(--text3); font-size: 14px; padding: 24px 0; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div class="auth-wrap" id="auth-screen">
+  <div class="auth-box">
+    <h2>Blog Admin</h2>
+    <p>Enter your admin password to continue.</p>
+    <label>Password</label>
+    <input type="password" id="pw-input" placeholder="Admin password" />
+    <p class="auth-error" id="auth-error">Incorrect password.</p>
+    <br>
+    <button class="btn btn-primary" onclick="login()" style="margin-top:8px;width:100%">Login</button>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="admin-wrap" id="admin-panel" style="display:none">
+  <div class="admin-header">
+    <h1>Blog Admin</h1>
+    <div class="admin-header-links">
+      <a href="/blog" target="_blank">View Blog &rarr;</a>
+      <a href="/" >App</a>
+    </div>
+  </div>
+
+  <!-- New Post Form -->
+  <div class="section-title">New Post</div>
+  <div class="form-card">
+    <div class="form-grid">
+      <div>
+        <label>Title *</label>
+        <input type="text" id="post-title" placeholder="Post title" />
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Author</label>
+          <input type="text" id="post-author" placeholder="LEADVOLVER" />
+        </div>
+        <div>
+          <label>Excerpt (optional)</label>
+          <input type="text" id="post-excerpt" placeholder="Short summary shown in listing" />
+        </div>
+      </div>
+      <div>
+        <label>Content *</label>
+        <textarea id="post-content" placeholder="Write your blog post here...&#10;&#10;Separate paragraphs with a blank line."></textarea>
+        <p class="hint">Separate paragraphs with a blank line. No special formatting required.</p>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="publish-btn" onclick="publishPost()">Publish Post</button>
+        <span class="status-msg" id="publish-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Existing Posts -->
+  <div class="section-title">Published Posts</div>
+  <div id="posts-list" class="posts-list">
+    <div class="empty-posts">Loading...</div>
+  </div>
+</div>
+
+<script>
+  let adminPassword = '';
+
+  function login() {
+    const pw = document.getElementById('pw-input').value.trim();
+    if (!pw) return;
+    adminPassword = pw;
+    loadPosts(true);
+  }
+
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  async function loadPosts(isLogin = false) {
+    const res = await fetch('/api/blog/admin/posts', {
+      headers: { 'x-admin-password': adminPassword }
+    });
+
+    if (res.status === 401) {
+      if (isLogin) {
+        document.getElementById('auth-error').style.display = 'block';
+      }
+      return;
+    }
+
+    if (isLogin) {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+    }
+
+    const posts = await res.json();
+    const list = document.getElementById('posts-list');
+
+    if (!posts.length) {
+      list.innerHTML = '<div class="empty-posts">No posts yet. Write your first one above.</div>';
+      return;
+    }
+
+    list.innerHTML = posts.map(p => `
+      <div class="post-item" id="item-${p.id}">
+        <div class="post-item-info">
+          <div class="post-item-title">
+            ${p.title}
+            ${!p.published ? '<span class="badge-draft">Draft</span>' : ''}
+          </div>
+          <div class="post-item-meta">${formatDate(p.created_at)} &middot; ${p.author} &middot; <a href="/blog/${p.slug}" target="_blank" style="color:var(--accent);text-decoration:none">View &rarr;</a></div>
+        </div>
+        <div class="post-item-actions">
+          <button class="btn btn-danger" onclick="deletePost(${p.id})">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function publishPost() {
+    const title = document.getElementById('post-title').value.trim();
+    const content = document.getElementById('post-content').value.trim();
+    const author = document.getElementById('post-author').value.trim();
+    const excerpt = document.getElementById('post-excerpt').value.trim();
+    const status = document.getElementById('publish-status');
+    const btn = document.getElementById('publish-btn');
+
+    if (!title || !content) {
+      status.textContent = 'Title and content are required.';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Publishing...';
+    status.className = 'status-msg';
+
+    try {
+      const res = await fetch('/api/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        body: JSON.stringify({ title, content, excerpt, author: author || 'LEADVOLVER' })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      status.textContent = 'Published!';
+      document.getElementById('post-title').value = '';
+      document.getElementById('post-content').value = '';
+      document.getElementById('post-excerpt').value = '';
+      document.getElementById('post-author').value = '';
+      loadPosts();
+
+      setTimeout(() => { status.textContent = ''; }, 3000);
+    } catch (e) {
+      status.textContent = e.message;
+      status.className = 'status-msg error';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function deletePost(id) {
+    if (!confirm('Delete this post? This cannot be undone.')) return;
+    await fetch(`/api/blog/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-password': adminPassword }
+    });
+    document.getElementById(`item-${id}`)?.remove();
+    const list = document.getElementById('posts-list');
+    if (!list.children.length) {
+      list.innerHTML = '<div class="empty-posts">No posts yet.</div>';
+    }
+  }
+</script>
+</body>
+</html>
