@@ -281,7 +281,7 @@ function statusBadge(status) {
 }
 
 async function toggleOptOut(id) {
-  if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); await initLeadsView(); return; }
+  if (state.demo) { toast('Demo Mode — actions disabled.', 'info'); await initLeadsView(); return; }
   try {
     const result = await api('PATCH', `/api/leads/${id}/optout`);
     const lead = state.leads.find(l => l.id == id);
@@ -299,7 +299,7 @@ async function toggleOptOut(id) {
 }
 
 async function handleCsvUpload(file) {
-  if (state.demo) { toast('Demo mode — CSV import disabled.', 'info'); return; }
+  if (state.demo) { toast('Demo Mode — actions disabled.', 'info'); return; }
   if (!file) return;
   if (!file.name.toLowerCase().endsWith('.csv')) {
     return toast('Please upload a .csv file.', 'error');
@@ -321,7 +321,7 @@ async function handleCsvUpload(file) {
 }
 
 async function launchCampaign() {
-  if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
+  if (state.demo) { toast('Demo Mode — actions disabled.', 'info'); return; }
   const confirmed = confirm(
     'Launch campaign now? This will send the initial SMS to all Pending and Active leads immediately.'
   );
@@ -416,10 +416,10 @@ async function saveCampaign() {
    ────────────────────────────────────────────────────────────── */
 async function initConversationsView() {
   if (state.demo) {
-    const { convList } = state.demoData;
-    renderConvList(convList);
+    renderConvList(state.demoData.convList);
     const badge = document.getElementById('conv-badge');
     if (badge) { badge.textContent = '2'; badge.style.display = 'inline-block'; }
+    await selectConversation('1001');
     return;
   }
   await loadConversations();
@@ -543,7 +543,7 @@ function renderThreadHeader(lead) {
   `;
 
   el.querySelector('#takeover-btn')?.addEventListener('click', async (e) => {
-    if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
+    if (state.demo) { toast('Demo Mode — actions disabled.', 'info'); return; }
     const btn = e.currentTarget;
     try {
       const result = await api('POST', `/api/conversations/${btn.dataset.id}/takeover`);
@@ -553,7 +553,7 @@ function renderThreadHeader(lead) {
   });
 
   el.querySelector('#book-btn')?.addEventListener('click', async (e) => {
-    if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
+    if (state.demo) { toast('Demo Mode — actions disabled.', 'info'); return; }
     const btn = e.currentTarget;
     if (btn.disabled) return;
     try {
@@ -628,7 +628,7 @@ function renderThreadActions(lead) {
 }
 
 async function sendManualReply(leadId, textarea) {
-  if (state.demo) { toast('Demo mode — no real actions performed.', 'info'); return; }
+  if (state.demo) { toast('Demo Mode — actions disabled.', 'info'); return; }
   const content = textarea.value.trim();
   if (!content) return;
 
