@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadCRM</title>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F0D060;
+            --gold-dark: #B8960C;
+            --bg: #0D0D0D;
+            --surface: #1A1A1A;
+            --surface2: #242424;
+            --border: #2E2E2E;
+            
+            --text: #F0F0F0;
+            --text-muted: #888;
+            --green: #2ECC71;
+            --green-bg: #122B1E;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--surface);
+            border-bottom: 2px solid var(--gold);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .logo { font-size: 20px; font-weight: 800; color: var(--gold); letter-spacing: 2px; }
+        .logo span { color: var(--text); font-weight: 300; }
+
+        .stats { display: flex; gap: 32px; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--gold); line-height: 1; }
+        .stat-value.green { color: var(--green); }
+        .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 3px; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            padding: 18px 32px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: var(--bg);
+        }
+
+        .search-wrap { flex: 1; min-width: 220px; position: relative; }
+
+        .search-wrap input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 16px 10px 38px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-wrap input:focus { border-color: var(--gold); }
+
+        .search-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.18s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-gold:hover { background: var(--gold-light); }
+
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* ── Table ── */
+        .table-wrap { padding: 0 32px 40px; overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+        th {
+            background: var(--surface);
+            color: var(--gold);
+            padding: 11px 13px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--gold-dark);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 13px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        tr { background: var(--surface); }
+        tr:nth-child(even) { background: var(--surface2); }
+        tr:hover { background: #2a2a2a !important; }
+
+        tr.contacted { background: var(--green-bg) !important; }
+        tr.contacted td { color: #9ddcba; }
+        tr.contacted:hover { background: #163324 !important; }
+
+        /* ── Channel dropdown ── */
+        .ch-wrap { position: relative; }
+
+        .ch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+
+        .ch-btn.none {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .ch-btn.none:hover { border-color: var(--gold); color: var(--gold); }
+
+        .ch-btn.some {
+            background: rgba(46,204,113,0.15);
+            color: var(--green);
+            border: 1px solid rgba(46,204,113,0.35);
+        }
+
+        .ch-btn.some:hover { background: rgba(46,204,113,0.25); }
+
+        .ch-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+        .ch-caret { font-size: 9px; opacity: 0.7; }
+
+        /* Dropdown panel */
+        .ch-panel {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: var(--surface2);
+            border: 1px solid var(--gold-dark);
+            border-radius: 10px;
+            padding: 6px;
+            z-index: 200;
+            min-width: 160px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            display: none;
+        }
+
+        .ch-panel.open { display: block; }
+
+        .ch-option {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 13px;
+            color: var(--text);
+            user-select: none;
+        }
+
+        .ch-option:hover { background: var(--surface); }
+
+        .ch-option input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--green);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .ch-icon { font-size: 15px; }
+
+        /* Links */
+        a.link { color: var(--gold); text-decoration: none; font-size: 12px; }
+        a.link:hover { text-decoration: underline; }
+
+        /* Action buttons */
+        .actions-cell { display: flex; gap: 5px; }
+
+        .btn-icon {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 7px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+            transition: all 0.18s;
+        }
+
+        .btn-icon:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-icon.del:hover { border-color: #e74c3c; color: #e74c3c; }
+
+        /* Empty state */
+        .empty { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+        .empty-icon { font-size: 52px; margin-bottom: 14px; }
+        .empty-title { font-size: 18px; color: var(--text); margin-bottom: 6px; font-weight: 600; }
+
+        /* ── Modal ── */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .overlay.open { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--gold-dark);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 640px;
+            max-height: 92vh;
+            overflow-y: auto;
+            transform: translateY(24px);
+            transition: transform 0.22s;
+        }
+
+        .overlay.open .modal { transform: translateY(0); }
+
+        .modal-head {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title { font-size: 15px; font-weight: 700; color: var(--gold); }
+
+        .modal-x {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .modal-x:hover { color: var(--text); background: var(--surface2); }
+
+        .modal-body { padding: 24px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .fg { display: flex; flex-direction: column; gap: 6px; }
+        .fg.full { grid-column: 1 / -1; }
+
+        .fg > label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .fg input[type="text"], .fg textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .fg input[type="text"]:focus, .fg textarea:focus { border-color: var(--gold); }
+        .fg textarea { resize: vertical; min-height: 80px; }
+
+        /* Outreach channel checkboxes in modal */
+        .channel-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 2px;
+        }
+
+        .channel-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            cursor: pointer;
+            transition: all 0.18s;
+            user-select: none;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .channel-chip:has(input:checked) {
+            border-color: var(--green);
+            background: rgba(46,204,113,0.1);
+            color: var(--green);
+        }
+
+        .channel-chip input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--green);
+            cursor: pointer;
+        }
+
+        .modal-foot {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface);
+            border: 1px solid var(--gold);
+            color: var(--text);
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 300;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.25s;
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold-dark); }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="logo">LEAD<span>CRM</span></div>
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value" id="s-total">0</div>
+            <div class="stat-label">Total Leads</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value green" id="s-contacted">0</div>
+            <div class="stat-label">Contacted</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="s-pending">0</div>
+            <div class="stat-label">Not Contacted</div>
+        </div>
+    </div>
+</header>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by name, company, city, email, job title…" oninput="render()">
+    </div>
+    <button class="btn btn-ghost" onclick="document.getElementById('csvFile').click()">⬆ Import CSV</button>
+    <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="importCSV(event)">
+    <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn btn-gold" onclick="openModal()">+ Add Lead</button>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+    <table id="tbl" style="display:none">
+        <thead>
+            <tr>
+                <th>Outreach</th>
+                <th>Full Name</th>
+                <th>Job Title</th>
+                <th>Email</th>
+                <th>LinkedIn</th>
+                <th>Company</th>
+                <th>Co. LinkedIn</th>
+                <th>Website</th>
+                <th>City</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+
+    <div class="empty" id="empty">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No leads yet</div>
+        <div>Add a lead manually or import a CSV file to get started.</div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+    <div class="modal" id="modal">
+        <div class="modal-head">
+            <div class="modal-title" id="modalTitle">Add New Lead</div>
+            <button class="modal-x" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="fg">
+                    <label>Full Name</label>
+                    <input type="text" id="f-name" placeholder="Jane Smith">
+                </div>
+                <div class="fg">
+                    <label>Job Title</label>
+                    <input type="text" id="f-title" placeholder="Marketing Manager">
+                </div>
+                <div class="fg">
+                    <label>Email</label>
+                    <input type="text" id="f-email" placeholder="jane@company.com">
+                </div>
+                <div class="fg">
+                    <label>City</label>
+                    <input type="text" id="f-city" placeholder="New York">
+                </div>
+                <div class="fg">
+                    <label>LinkedIn URL</label>
+                    <input type="text" id="f-linkedin" placeholder="linkedin.com/in/janesmith">
+                </div>
+                <div class="fg">
+                    <label>Company Name</label>
+                    <input type="text" id="f-company" placeholder="Acme Corp">
+                </div>
+                <div class="fg">
+                    <label>Company Website</label>
+                    <input type="text" id="f-website" placeholder="acme.com">
+                </div>
+                <div class="fg">
+                    <label>Company LinkedIn</label>
+                    <input type="text" id="f-complin" placeholder="linkedin.com/company/acme">
+                </div>
+                <div class="fg full">
+                    <label>Notes</label>
+                    <textarea id="f-notes" placeholder="Any notes about this lead…"></textarea>
+                </div>
+                <div class="fg full">
+                    <label>Outreach Channels</label>
+                    <div class="channel-grid">
+                        <label class="channel-chip">
+                            <input type="checkbox" id="ch-email" value="Email">
+                            <span>📧 Email</span>
+                        </label>
+                        <label class="channel-chip">
+                            <input type="checkbox" id="ch-linkedin" value="LinkedIn">
+                            <span>💼 LinkedIn</span>
+                        </label>
+                        <label class="channel-chip">
+                            <input type="checkbox" id="ch-call" value="Call">
+                            <span>📞 Call</span>
+                        </label>
+                        <label class="channel-chip">
+                            <input type="checkbox" id="ch-other" value="Other">
+                            <span>💬 Other</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-gold" onclick="saveLead()">Save Lead</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const CHANNELS = [
+        { id: 'ch-email',    value: 'Email',    icon: '📧' },
+        { id: 'ch-linkedin', value: 'LinkedIn', icon: '💼' },
+        { id: 'ch-call',     value: 'Call',     icon: '📞' },
+        { id: 'ch-other',    value: 'Other',    icon: '💬' },
+    ];
+
+    let leads = JSON.parse(localStorage.getItem('crm_leads') || '[]');
+
+    // migrate old boolean `emailed` to channels array
+    leads.forEach(l => {
+        if (!Array.isArray(l.channels)) {
+            l.channels = l.emailed ? ['Email'] : [];
+            delete l.emailed;
+        }
+    });
+
+    let editId = null;
+    let openDropId = null;
+
+    /* ── Persist & Stats ── */
+    function persist() {
+        localStorage.setItem('crm_leads', JSON.stringify(leads));
+        const c = leads.filter(l => l.channels.length > 0).length;
+        document.getElementById('s-total').textContent = leads.length;
+        document.getElementById('s-contacted').textContent = c;
+        document.getElementById('s-pending').textContent = leads.length - c;
+    }
+
+    /* ── Toast ── */
+    function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    /* ── Channel label builder ── */
+    function channelLabel(channels) {
+        if (!channels || channels.length === 0) return 'Not Contacted';
+        return channels.join(' · ');
+    }
+
+    function channelIcons(channels) {
+        const iconMap = { Email: '📧', LinkedIn: '💼', Call: '📞', Other: '💬' };
+        return channels.map(c => iconMap[c] || c).join(' ');
+    }
+
+    /* ── Render table ── */
+    function render() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows = q
+            ? leads.filter(l => [l.name,l.title,l.email,l.company,l.city,l.website,l.linkedin].some(v => v && v.toLowerCase().includes(q)))
+            : leads;
+
+        const tbl = document.getElementById('tbl');
+        const empty = document.getElementById('empty');
+
+        if (rows.length === 0) {
+            tbl.style.display = 'none';
+            empty.style.display = '';
+        } else {
+            tbl.style.display = '';
+            empty.style.display = 'none';
+        }
+
+        const contacted = rows.filter(l => l.channels.length > 0);
+        const notContacted = rows.filter(l => l.channels.length === 0);
+
+        // render contacted first (green), then not contacted (white)
+        const sorted = [...contacted, ...notContacted];
+
+        document.getElementById('tbody').innerHTML = sorted.map(l => {
+            const hasChannels = l.channels.length > 0;
+            return `
+            <tr class="${hasChannels ? 'contacted' : ''}">
+                <td style="overflow:visible; white-space:nowrap;">
+                    <div class="ch-wrap">
+                        <button class="ch-btn ${hasChannels ? 'some' : 'none'}" onclick="toggleDropdown('${l.id}', event)">
+                            <span class="ch-dot"></span>
+                            ${hasChannels ? channelIcons(l.channels) + ' ' + channelLabel(l.channels) : 'Not Contacted'}
+                            <span class="ch-caret">▾</span>
+                        </button>
+                        <div class="ch-panel" id="dp-${l.id}">
+                            ${CHANNELS.map(ch => `
+                                <label class="ch-option">
+                                    <input type="checkbox" ${l.channels.includes(ch.value) ? 'checked' : ''}
+                                        onchange="setChannel('${l.id}','${ch.value}',this.checked)">
+                                    <span class="ch-icon">${ch.icon}</span>
+                                    <span>${ch.value}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                </td>
+                <td title="${esc(l.name)}">${esc(l.name) || '—'}</td>
+                <td title="${esc(l.title)}">${esc(l.title) || '—'}</td>
+                <td title="${esc(l.email)}">${l.email ? `<a class="link" href="mailto:${esc(l.email)}">${esc(l.email)}</a>` : '—'}</td>
+                <td>${l.linkedin ? `<a class="link" href="${http(l.linkedin)}" target="_blank" rel="noopener">View ↗</a>` : '—'}</td>
+                <td title="${esc(l.company)}">${esc(l.company) || '—'}</td>
+                <td>${l.complin ? `<a class="link" href="${http(l.complin)}" target="_blank" rel="noopener">View ↗</a>` : '—'}</td>
+                <td>${l.website ? `<a class="link" href="${http(l.website)}" target="_blank" rel="noopener">${esc(l.website)}</a>` : '—'}</td>
+                <td title="${esc(l.city)}">${esc(l.city) || '—'}</td>
+                <td title="${esc(l.notes)}">${l.notes ? esc(l.notes.substring(0,30)) + (l.notes.length > 30 ? '…' : '') : '—'}</td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn-icon" title="Edit" onclick="openModal('${l.id}')">✏️</button>
+                        <button class="btn-icon del" title="Delete" onclick="deleteLead('${l.id}')">🗑</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    /* ── Dropdown logic ── */
+    function toggleDropdown(id, e) {
+        e.stopPropagation();
+        if (openDropId && openDropId !== id) closeAllDropdowns();
+        const panel = document.getElementById('dp-' + id);
+        const isOpen = panel.classList.contains('open');
+        closeAllDropdowns();
+        if (!isOpen) { panel.classList.add('open'); openDropId = id; }
+        else openDropId = null;
+    }
+
+    function closeAllDropdowns() {
+        document.querySelectorAll('.ch-panel.open').forEach(p => p.classList.remove('open'));
+        openDropId = null;
+    }
+
+    document.addEventListener('click', closeAllDropdowns);
+
+    /* ── Set channel ── */
+    function setChannel(id, channel, checked) {
+        const l = leads.find(x => x.id === id);
+        if (!l) return;
+        if (checked && !l.channels.includes(channel)) l.channels.push(channel);
+        if (!checked) l.channels = l.channels.filter(c => c !== channel);
+        persist();
+        render();
+        // re-open dropdown so user can keep selecting
+        setTimeout(() => {
+            const panel = document.getElementById('dp-' + id);
+            if (panel) { panel.classList.add('open'); openDropId = id; }
+        }, 10);
+        toast(checked ? `✅ ${channel} marked` : `${channel} removed`);
+    }
+
+    /* ── Helpers ── */
+    function esc(v) {
+        if (!v) return '';
+        return v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function http(url) {
+        if (!url) return '#';
+        return /^https?:\/\//i.test(url) ? url : 'https://' + url;
+    }
+
+    /* ── Delete ── */
+    function deleteLead(id) {
+        if (!confirm('Delete this lead? This cannot be undone.')) return;
+        leads = leads.filter(x => x.id !== id);
+        persist();
+        render();
+        toast('Lead deleted');
+    }
+
+    /* ── Modal ── */
+    function openModal(id) {
+        editId = id || null;
+        document.getElementById('modalTitle').textContent = id ? 'Edit Lead' : 'Add New Lead';
+        const textFields = ['name','title','email','city','linkedin','company','website','complin','notes'];
+        if (id) {
+            const l = leads.find(x => x.id === id);
+            textFields.forEach(f => document.getElementById('f-'+f).value = l[f] || '');
+            CHANNELS.forEach(ch => document.getElementById(ch.id).checked = l.channels.includes(ch.value));
+        } else {
+            textFields.forEach(f => document.getElementById('f-'+f).value = '');
+            CHANNELS.forEach(ch => document.getElementById(ch.id).checked = false);
+        }
+        document.getElementById('overlay').classList.add('open');
+        document.getElementById('f-name').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').classList.remove('open');
+        editId = null;
+    }
+
+    function overlayClick(e) {
+        if (e.target === document.getElementById('overlay')) closeModal();
+    }
+
+    /* ── Save ── */
+    function saveLead() {
+        const channels = CHANNELS.filter(ch => document.getElementById(ch.id).checked).map(ch => ch.value);
+        const lead = {
+            id:       editId || (Date.now().toString(36) + Math.random().toString(36).slice(2)),
+            name:     document.getElementById('f-name').value.trim(),
+            title:    document.getElementById('f-title').value.trim(),
+            email:    document.getElementById('f-email').value.trim(),
+            city:     document.getElementById('f-city').value.trim(),
+            linkedin: document.getElementById('f-linkedin').value.trim(),
+            company:  document.getElementById('f-company').value.trim(),
+            website:  document.getElementById('f-website').value.trim(),
+            complin:  document.getElementById('f-complin').value.trim(),
+            notes:    document.getElementById('f-notes').value.trim(),
+            channels,
+            addedAt:  editId ? (leads.find(x => x.id === editId)?.addedAt || Date.now()) : Date.now()
+        };
+        if (editId) {
+            const i = leads.findIndex(x => x.id === editId);
+            leads[i] = lead;
+            toast('Lead updated');
+        } else {
+            leads.unshift(lead);
+            toast('✅ Lead added');
+        }
+        persist();
+        render();
+        closeModal();
+    }
+
+    /* ── Import CSV ── */
+    function importCSV(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const lines = ev.target.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l => l.trim());
+            if (lines.length < 2) { toast('CSV too short or empty'); return; }
+
+            const rawHeaders = parseCSVLine(lines[0]);
+            const headers = rawHeaders.map(h => h.toLowerCase().trim().replace(/[^a-z0-9 ]/g,''));
+
+            const map = {
+                name:    ['full name','fullname','name','first name','firstname','contact name'],
+                title:   ['job title','title','jobtitle','position','role'],
+                email:   ['email','email address','work email'],
+                city:    ['city','location','region'],
+                linkedin:['linkedin url','linkedin','linkedin profile','person linkedin url'],
+                company: ['company name','company','organization','employer','account name'],
+                website: ['company website','website','web','url','domain'],
+                complin: ['company linkedin','company linkedin url','organization linkedin','linkedin company'],
+                notes:   ['notes','note','comments','comment','description']
+            };
+
+            const idx = {};
+            for (const [field, aliases] of Object.entries(map)) {
+                idx[field] = headers.findIndex(h => aliases.includes(h));
+            }
+
+            let added = 0;
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = parseCSVLine(lines[i]);
+                const lead = {
+                    id:       Date.now().toString(36) + i + Math.random().toString(36).slice(2),
+                    name:     idx.name    >= 0 ? (cols[idx.name]    || '').trim() : '',
+                    title:    idx.title   >= 0 ? (cols[idx.title]   || '').trim() : '',
+                    email:    idx.email   >= 0 ? (cols[idx.email]   || '').trim() : '',
+                    city:     idx.city    >= 0 ? (cols[idx.city]    || '').trim() : '',
+                    linkedin: idx.linkedin>= 0 ? (cols[idx.linkedin]|| '').trim() : '',
+                    company:  idx.company >= 0 ? (cols[idx.company] || '').trim() : '',
+                    website:  idx.website >= 0 ? (cols[idx.website] || '').trim() : '',
+                    complin:  idx.complin >= 0 ? (cols[idx.complin] || '').trim() : '',
+                    notes:    idx.notes   >= 0 ? (cols[idx.notes]   || '').trim() : '',
+                    channels: [],
+                    addedAt:  Date.now()
+                };
+                if (lead.name || lead.email || lead.company) { leads.unshift(lead); added++; }
+            }
+            persist();
+            render();
+            toast(`✅ Imported ${added} lead${added !== 1 ? 's' : ''}`);
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    function parseCSVLine(line) {
+        const cols = [];
+        let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            if (c === '"') {
+                if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+                else inQ = !inQ;
+            } else if (c === ',' && !inQ) {
+                cols.push(cur.trim()); cur = '';
+            } else { cur += c; }
+        }
+        cols.push(cur.trim());
+        return cols;
+    }
+
+    /* ── Export CSV ── */
+    function exportCSV() {
+        if (!leads.length) { toast('No leads to export'); return; }
+        const H = ['Full Name','Job Title','Email','LinkedIn URL','Company Name','Company Website','Company LinkedIn','City','Notes','Outreach Channels'];
+        const rows = leads.map(l => [
+            l.name, l.title, l.email, l.linkedin, l.company, l.website, l.complin, l.city, l.notes,
+            l.channels.length ? l.channels.join(', ') : 'Not Contacted'
+        ].map(v => `"${(v||'').replace(/"/g,'""')}"`));
+        const csv = [H.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+        a.download = `leads_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        toast('CSV exported');
+    }
+
+    /* ── Keyboard shortcuts ── */
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeModal(); closeAllDropdowns(); }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) saveLead();
+    });
+
+    /* ── Init ── */
+    persist();
+    render();
+</script>
+</body>
+</html>
