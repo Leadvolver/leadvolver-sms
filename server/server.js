@@ -97,6 +97,7 @@ async function handleInboundSMS(phone, body) {
   }
 }
 
+app.get('/crm', (req, res) => res.sendFile(path.join(__dirname, '../public/crm.html')));
 app.get('/blog', (req, res) => res.sendFile(path.join(__dirname, '../public/blog.html')));
 app.get('/blog/:slug', (req, res) => res.sendFile(path.join(__dirname, '../public/blog-post.html')));
 app.get('/admin/blog', (req, res) => res.sendFile(path.join(__dirname, '../public/admin-blog.html')));
