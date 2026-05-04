@@ -9,7 +9,6 @@ function startScheduler() {
     isRunning = true;
     try {
       await processFollowUps();
-      await processEmailFollowUps();
     } catch (err) {
       console.error('[Scheduler] Error:', err.message);
     } finally {
@@ -103,53 +102,6 @@ function cancelFollowUpsForLead(leadId) {
   db.prepare(
     `UPDATE follow_up_schedule SET cancelled = 1 WHERE lead_id = ? AND sent = 0 AND cancelled = 0`
   ).run(leadId);
-}
-
-async function processEmailFollowUps() {
-  const tableExists = db.prepare(
-    `SELECT name FROM sqlite_master WHERE type='table' AND name='email_followups'`
-  ).get();
-  if (!tableExists) return;
-
-  const now = new Date().toISOString();
-
-  const due = db.prepare(`
-    SELECT ef.id, ef.lead_email, ef.followup_number,
-           ol.name, ol.company, ol.industry, ol.city, ol.website, ol.linkedin, ol.title, ol.replied
-    FROM email_followups ef
-    JOIN outreach_leads ol ON ef.lead_email = ol.email
-    WHERE ef.scheduled_for <= ?
-      AND ef.sent = 0
-      AND ef.cancelled = 0
-      AND ol.replied = 0
-    ORDER BY ef.scheduled_for ASC
-  `).all(now);
-
-  if (due.length === 0) return;
-
-  const { generateColdEmail } = require('./claude');
-  const { sendEmail } = require('./gmail');
-
-  for (const item of due) {
-    try {
-      const lead = {
-        name: item.name, email: item.lead_email, company: item.company,
-        industry: item.industry, city: item.city, website: item.website,
-        linkedin: item.linkedin, title: item.title
-      };
-
-      const email = await generateColdEmail(lead, item.followup_number);
-      await sendEmail({ to: item.lead_email, subject: email.subject, body: email.body });
-
-      db.prepare(`UPDATE email_followups SET sent = 1 WHERE id = ?`).run(item.id);
-      db.prepare(`UPDATE outreach_leads SET email_count = email_count + 1, last_email_at = ? WHERE email = ?`)
-        .run(new Date().toISOString(), item.lead_email);
-
-      console.log(`[Scheduler] Email follow-up #${item.followup_number} sent to ${item.name} <${item.lead_email}>`);
-    } catch (err) {
-      console.error(`[Scheduler] Email follow-up failed for ${item.lead_email}:`, err.message);
-    }
-  }
 }
 
 module.exports = { startScheduler, scheduleFollowUpsForLead, cancelFollowUpsForLead };

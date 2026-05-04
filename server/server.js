@@ -17,8 +17,6 @@ app.use('/api/campaign',       require('./routes/campaign'));
 app.use('/api/conversations',  require('./routes/conversations'));
 app.use('/api/settings',       require('./routes/settings'));
 app.use('/api/blog',           require('./routes/blog'));
-app.use('/api/finder',         require('./routes/finder'));
-app.use('/api/outreach',       require('./routes/outreach'));
 
 app.post('/twilio/webhook', (req, res) => {
   res.type('text/xml').send('<Response></Response>');
