@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slide 3 - CRM Is Not A Follow-Up System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    background: #0a0a0a;
+    font-family: 'Space Grotesk', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvas {
+    width: 1080px;
+    height: 1080px;
+    background: #0a0a0a;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background grid */
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+  }
+
+  /* Background glow */
+  .bg-glow {
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 65%);
+    z-index: 0;
+  }
+
+  .bg-glow-2 {
+    position: absolute;
+    bottom: -150px;
+    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 65%);
+    z-index: 0;
+  }
+
+  /* Slide counter */
+  .slide-counter {
+    position: absolute;
+    top: 44px;
+    right: 52px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #404040;
+    letter-spacing: 0.05em;
+    z-index: 10;
+  }
+
+  /* Brand */
+  .brand {
+    position: absolute;
+    bottom: 40px;
+    left: 52px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    z-index: 10;
+  }
+
+  /* Main layout */
+  .content-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    padding: 72px 72px 80px 72px;
+  }
+
+  /* Top section */
+  .top-section {
+    flex: 0 0 auto;
+    margin-bottom: 44px;
+  }
+
+  .label-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 4px;
+    padding: 6px 14px;
+    margin-bottom: 26px;
+  }
+
+  .label-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239,68,68,0.8);
+  }
+
+  .label-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ef4444;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 82px;
+    line-height: 0.92;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    margin-bottom: 20px;
+  }
+
+  .headline .highlight {
+    color: #ef4444;
+    position: relative;
+  }
+
+  .subheadline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: #888;
+    line-height: 1.5;
+    max-width: 500px;
+  }
+
+  /* Main visual area */
+  .visual-area {
+    flex: 1;
+    display: flex;
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  /* CRM Dashboard mockup */
+  .dashboard-panel {
+    flex: 1;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-titlebar {
+    background: #161616;
+    border-bottom: 1px solid #1e1e1e;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dot-red { width: 11px; height: 11px; border-radius: 50%; background: #ef4444; opacity: 0.7; }
+  .dot-yellow { width: 11px; height: 11px; border-radius: 50%; background: #f59e0b; opacity: 0.7; }
+  .dot-green { width: 11px; height: 11px; border-radius: 50%; background: #22c55e; opacity: 0.7; }
+
+  .titlebar-label {
+    margin-left: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #444;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .dashboard-body {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .crm-row {
+    background: #161616;
+    border: 1px solid #232323;
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .crm-row.stale {
+    border-color: #1a1a1a;
+    opacity: 0.45;
+  }
+
+  .crm-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    flex-shrink: 0;
+    border: 1px solid #2a2a2a;
+  }
+
+  .crm-avatar.active {
+    background: linear-gradient(135deg, #1e3a2f, #0d2318);
+    color: #22c55e;
+    border-color: #1a3326;
+  }
+
+  .crm-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .crm-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ccc;
+    margin-bottom: 3px;
+  }
+
+  .crm-name.dim { color: #444; }
+
+  .crm-detail {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: #383838;
+    font-weight: 400;
+  }
+
+  .crm-detail.dim { color: #2a2a2a; }
+
+  .crm-status {
+    flex-shrink: 0;
+  }
+
+  .status-badge {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .status-badge.cold {
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  .status-badge.lost {
+    background: rgba(100,100,100,0.1);
+    color: #555;
+    border: 1px solid rgba(100,100,100,0.2);
+  }
+
+  .status-badge.active {
+    background: rgba(34,197,94,0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.2);
+  }
+
+  .crm-timestamp {
+    flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: #2e2e2e;
+    font-weight: 400;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .crm-timestamp.active-time {
+    color: #22c55e;
+  }
+
+  /* Right side - insight panel */
+  .insight-panel {
+    width: 270px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .insight-card {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 14px;
+    padding: 20px;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight-card.highlight-card {
+    background: linear-gradient(135deg, #1a0a0a 0%, #110707 100%);
+    border-color: rgba(239,68,68,0.25);
+  }
+
+  .insight-card.highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ef4444, transparent);
+  }
+
+  .insight-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px

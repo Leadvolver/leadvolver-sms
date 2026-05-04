@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slide 5 - Reactivated Leads</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    background: #080a0f;
+    font-family: 'Space Grotesk', sans-serif;
+    position: relative;
+  }
+
+  .canvas {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    background: #080a0f;
+  }
+
+  /* Background grid */
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+  }
+
+  /* Ambient glow bg */
+  .bg-glow-1 {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    z-index: 0;
+  }
+
+  .bg-glow-2 {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.07) 0%, transparent 70%);
+    bottom: -100px;
+    left: -50px;
+    z-index: 0;
+  }
+
+  /* Slide counter */
+  .slide-counter {
+    position: absolute;
+    top: 44px;
+    right: 52px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #3a3f4a;
+    letter-spacing: 0.05em;
+    z-index: 100;
+  }
+
+  /* Brand */
+  .brand {
+    position: absolute;
+    bottom: 42px;
+    left: 52px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2e3340;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    z-index: 100;
+  }
+
+  /* Main content */
+  .content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 72px 80px;
+    z-index: 10;
+    gap: 0;
+  }
+
+  /* Tag label */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 100px;
+    padding: 8px 18px;
+    margin-bottom: 32px;
+  }
+
+  .tag-dot {
+    width: 7px;
+    height: 7px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .tag-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #10b981;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Headline */
+  .headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 92px;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    margin-bottom: 36px;
+    max-width: 640px;
+  }
+
+  .headline .highlight {
+    color: #10b981;
+    position: relative;
+    display: inline;
+  }
+
+  /* Body text */
+  .body-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    line-height: 1.65;
+    color: #8a95a3;
+    max-width: 500px;
+    font-weight: 400;
+    margin-bottom: 48px;
+  }
+
+  .body-text strong {
+    color: #c8d0da;
+    font-weight: 600;
+  }
+
+  /* Divider line */
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #10b981, transparent);
+    margin-bottom: 36px;
+    border-radius: 2px;
+  }
+
+  /* Right side metric area */
+  .right-panel {
+    position: absolute;
+    right: 72px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 10;
+    width: 320px;
+  }
+
+  /* Big number card */
+  .big-stat-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 24px;
+    padding: 36px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 60px rgba(16, 185, 129, 0.15),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .big-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(16,185,129,0.6), transparent);
+  }
+
+  .big-stat-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .big-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 110px;
+    line-height: 1;
+    color: #10b981;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+    position: relative;
+    z-index: 1;
+  }
+
+  .big-number-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #10b981;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+    opacity: 0.85;
+  }
+
+  /* Comparison metric cards */
+  .metric-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card.active {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.2);
+  }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .metric-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #4a5260;
+  }
+
+  .metric-card.active .metric-label {
+    color: #10b981;
+  }
+
+  .metric-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #3a4050;
+  }
+
+  .metric-card.active .metric-value {
+    color: #ffffff;
+  }
+
+  /* Progress bar */
+  .progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: #2a2f3a;
+  }
+
+  .metric-card.active .progress-fill {
+    background: linear-gradient(90deg, #10b981, #34d399);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+  }
+
+  /* Cost badge */
+  .cost-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .cost-badge.low {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+  }
+
+  .cost-badge.high {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  /* Bottom stat bar */
+  .bottom-stat-bar {
+    position: absolute;
+    bottom: 92px;
+    left: 80px;
+    right: 420px;
+    display: flex;

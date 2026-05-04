@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slide 4 - Timing Kills Deals</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 1080px;
+  height: 1080px;
+  overflow: hidden;
+  background: #080808;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.canvas {
+  width: 1080px;
+  height: 1080px;
+  background: #080808;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background texture */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,80,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,80,0,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: 0;
+}
+
+.bg-glow-left {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,60,0,0.12) 0%, transparent 70%);
+  top: -80px;
+  left: -80px;
+  z-index: 0;
+}
+
+.bg-glow-right {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255,140,0,0.07) 0%, transparent 70%);
+  bottom: 50px;
+  right: -100px;
+  z-index: 0;
+}
+
+/* Top bar */
+.top-bar {
+  position: absolute;
+  top: 42px;
+  left: 52px;
+  right: 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.tag-pill {
+  background: rgba(255,80,0,0.15);
+  border: 1px solid rgba(255,80,0,0.35);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: #FF5000;
+  text-transform: uppercase;
+}
+
+.slide-counter {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  letter-spacing: 1px;
+}
+
+/* Headline section */
+.headline-section {
+  position: absolute;
+  top: 108px;
+  left: 52px;
+  right: 52px;
+  z-index: 10;
+}
+
+.headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 82px;
+  line-height: 0.92;
+  letter-spacing: 2px;
+  color: #FFFFFF;
+}
+
+.headline .highlight {
+  color: #FF5000;
+  position: relative;
+  display: inline-block;
+}
+
+.subheadline {
+  margin-top: 18px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #888;
+  line-height: 1.55;
+  max-width: 500px;
+}
+
+/* MAIN MOCKUP - Timeline / CRM Deal Stage Visual */
+.mockup-container {
+  position: absolute;
+  top: 340px;
+  left: 52px;
+  right: 52px;
+  z-index: 10;
+}
+
+/* Browser chrome */
+.browser-frame {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px #1a1a1a;
+}
+
+.browser-bar {
+  background: #161616;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #222;
+}
+
+.browser-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.dot-r { background: #FF5F57; }
+.dot-y { background: #FFBD2E; }
+.dot-g { background: #28CA41; }
+
+.browser-url {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #555;
+}
+
+.browser-content {
+  padding: 24px 24px 20px;
+}
+
+/* CRM Label */
+.crm-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #444;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* Timeline rows */
+.timeline-grid {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  gap: 0;
+}
+
+.timeline-header {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  gap: 0;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.th-cell {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.th-cell:last-child {
+  text-align: right;
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #161616;
+  position: relative;
+}
+
+.timeline-row:last-child {
+  border-bottom: none;
+}
+
+.t-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ccc;
+}
+
+.t-name span {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: #444;
+  margin-top: 1px;
+}
+
+/* Dots timeline */
+.t-track {
+  position: relative;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.track-line {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: #1e1e1e;
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
+
+.track-fill {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  height: 2px;
+  border-radius: 2px;
+  transform: translateY(-50%);
+}
+
+.track-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #111;
+  z-index: 2;
+}
+
+.dot-done { background: #FF5000; border-color: #111; }
+.dot-missed { background: #2a2a2a; border-color: #1a1a1a; }
+.dot-active {
+  background: #FF5000;
+  border-color: #FF5000;
+  box-shadow: 0 0 10px rgba(255,80,0,0.7), 0 0 20px rgba(255,80,0,0.3);
+  width: 12px;
+  height: 12px;
+}
+.dot-competitor {
+  background: #00C896;
+  border-color: #111;
+  box-shadow: 0 0 10px rgba(0,200,150,0.6);
+  width: 12px;
+  height: 12px;
+}
+
+.t-label-top {
+  position: absolute;
+  top: -2px;
+  transform: translateX(-50%);
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+
+.t-label-bottom {
+  position: absolute;
+  bottom: -2px;
+  transform: translateX(-50%);
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.label-orange { color: #FF5000; }
+.label-green { color: #00C896; }
+.label-grey { color: #444; }
+
+.t-status {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.status-lost { color: #555; }
+.status-won { color: #00C896; }
+.status-active { color: #FF5000; }
+
+/* Highlighted row */
+.row-highlight {
+  background: rgba(255,80,0,0.05);
+  border-radius: 8px;
+  margin: 0 -8px;
+  padding: 9px 8px !important;
+}
+
+/* Bottom insight box */
+.insight-box {
+  position: absolute;
+  bottom: 52px;
+  left: 52px;
+  right: 52px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(255,80,0,0.1) 0%, rgba(255,80,0,0.05) 100%);
+  border: 1px solid rgba(255,80,0,0.25);
+  border-radius: 14px;
+  padding: 18px 24px;
+  z-index: 10;
+}
+
+.insight-icon {
+  width: 42px;
+  height: 42px;
+  background: rgba(255,80,0,0.2);
+  border-radius: 10px;
