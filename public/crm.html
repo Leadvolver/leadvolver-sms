@@ -612,6 +612,7 @@
     <button class="btn btn-ghost" onclick="document.getElementById('csvFile').click()">⬆ Import CSV</button>
     <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="importCSV(event)">
     <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn btn-ghost" style="border-color:#e74c3c;color:#e74c3c" onclick="clearUncontacted()">🗑 Remove Uncontacted</button>
     <button class="btn btn-gold" onclick="openFinderModal()" style="background:linear-gradient(135deg,#D4AF37,#f0c040)">🤖 Find Leads</button>
     <button class="btn btn-gold" onclick="openModal()">+ Add Lead</button>
 </div>
@@ -1157,6 +1158,15 @@
     }
 
     /* ── Export CSV ── */
+    function clearUncontacted() {
+        const before = leads.length;
+        leads = leads.filter(l => Array.isArray(l.channels) && l.channels.length > 0);
+        const removed = before - leads.length;
+        persist();
+        render();
+        toast(removed + ' uncontacted lead' + (removed !== 1 ? 's' : '') + ' removed');
+    }
+
     function exportCSV() {
         if (!leads.length) { toast('No leads to export'); return; }
         const H = ['Full Name','Job Title','Email','LinkedIn URL','Company Name','Company Website','Company LinkedIn','City','Notes','Outreach Channels'];
