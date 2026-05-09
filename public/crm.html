@@ -187,6 +187,9 @@
 
         .ch-caret { font-size: 9px; opacity: 0.7; }
 
+        .ch-btn { max-width: 150px; }
+        .ch-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+
         /* Dropdown panel */
         .ch-panel {
             position: absolute;
@@ -197,10 +200,13 @@
             border-radius: 10px;
             padding: 6px;
             z-index: 200;
-            min-width: 160px;
+            min-width: 180px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             display: none;
         }
+
+        .ch-divider { height: 1px; background: var(--border); margin: 5px 4px; }
+        .ch-section { font-size: 9px; color: var(--text-muted); padding: 4px 10px 2px; text-transform: uppercase; letter-spacing: 0.8px; }
 
         .ch-panel.open { display: block; }
 
@@ -834,6 +840,15 @@
         { id: 'ch-other',    value: 'Other',    icon: '💬' },
     ];
 
+    const FOLLOWUPS = [
+        { value: 'Follow Up 1', icon: '🔁' },
+        { value: 'Follow Up 2', icon: '🔁' },
+        { value: 'Follow Up 3', icon: '🔁' },
+        { value: 'Follow Up 4', icon: '🔁' },
+        { value: 'Follow Up 5', icon: '🔁' },
+        { value: 'Follow Up 6', icon: '🔁' },
+    ];
+
     let leads = JSON.parse(localStorage.getItem('crm_leads') || '[]');
 
     // migrate old boolean `emailed` to channels array
@@ -867,12 +882,15 @@
     /* ── Channel label builder ── */
     function channelLabel(channels) {
         if (!channels || channels.length === 0) return 'Not Contacted';
-        return channels.join(' · ');
+        if (channels.length === 1) return channels[0];
+        return channels[channels.length - 1]; // show latest status
     }
 
     function channelIcons(channels) {
-        const iconMap = { Email: '📧', LinkedIn: '💼', Call: '📞', Other: '💬' };
-        return channels.map(c => iconMap[c] || c).join(' ');
+        const iconMap = { Email: '📧', LinkedIn: '💼', Call: '📞', Other: '💬',
+            'Follow Up 1':'🔁','Follow Up 2':'🔁','Follow Up 3':'🔁',
+            'Follow Up 4':'🔁','Follow Up 5':'🔁','Follow Up 6':'🔁' };
+        return channels.map(c => iconMap[c] || '').filter(Boolean).slice(-1).join('');
     }
 
     /* ── Render table ── */
@@ -903,20 +921,32 @@
             const hasChannels = l.channels.length > 0;
             return `
             <tr class="${hasChannels ? 'contacted' : ''}">
-                <td style="overflow:visible; white-space:nowrap;">
+                <td style="overflow:visible;">
                     <div class="ch-wrap">
                         <button class="ch-btn ${hasChannels ? 'some' : 'none'}" onclick="toggleDropdown('${l.id}', event)">
                             <span class="ch-dot"></span>
-                            ${hasChannels ? channelIcons(l.channels) + ' ' + channelLabel(l.channels) : 'Not Contacted'}
+                            ${hasChannels ? `<span style="margin-right:2px">${channelIcons(l.channels)}</span>` : ''}
+                            <span class="ch-label">${hasChannels ? channelLabel(l.channels) : 'Not Contacted'}</span>
                             <span class="ch-caret">▾</span>
                         </button>
                         <div class="ch-panel" id="dp-${l.id}">
+                            <div class="ch-section">Contact</div>
                             ${CHANNELS.map(ch => `
                                 <label class="ch-option">
                                     <input type="checkbox" ${l.channels.includes(ch.value) ? 'checked' : ''}
                                         onchange="setChannel('${l.id}','${ch.value}',this.checked)">
                                     <span class="ch-icon">${ch.icon}</span>
                                     <span>${ch.value}</span>
+                                </label>
+                            `).join('')}
+                            <div class="ch-divider"></div>
+                            <div class="ch-section">Follow Ups</div>
+                            ${FOLLOWUPS.map(fu => `
+                                <label class="ch-option">
+                                    <input type="checkbox" ${l.channels.includes(fu.value) ? 'checked' : ''}
+                                        onchange="setChannel('${l.id}','${fu.value}',this.checked)">
+                                    <span class="ch-icon">${fu.icon}</span>
+                                    <span>${fu.value}</span>
                                 </label>
                             `).join('')}
                         </div>
