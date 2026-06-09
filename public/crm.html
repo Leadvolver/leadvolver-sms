@@ -626,6 +626,7 @@
                 <th>Full Name</th>
                 <th>Job Title</th>
                 <th>Email</th>
+                <th>Phone</th>
                 <th>LinkedIn</th>
                 <th>Company</th>
                 <th>Co. LinkedIn</th>
@@ -665,6 +666,10 @@
                 <div class="fg">
                     <label>Email</label>
                     <input type="text" id="f-email" placeholder="jane@company.com">
+                </div>
+                <div class="fg">
+                    <label>Phone</label>
+                    <input type="text" id="f-phone" placeholder="+1 (555) 000-0000">
                 </div>
                 <div class="fg">
                     <label>City</label>
@@ -898,7 +903,7 @@
     function render() {
         const q = document.getElementById('searchInput').value.toLowerCase().trim();
         const rows = q
-            ? leads.filter(l => [l.name,l.title,l.email,l.company,l.city,l.website,l.linkedin].some(v => v && v.toLowerCase().includes(q)))
+            ? leads.filter(l => [l.name,l.title,l.email,l.phone,l.company,l.city,l.website,l.linkedin].some(v => v && v.toLowerCase().includes(q)))
             : leads;
 
         const tbl = document.getElementById('tbl');
@@ -956,6 +961,7 @@
                 <td title="${esc(l.name)}">${esc(l.name) || '—'}</td>
                 <td title="${esc(l.title)}">${esc(l.title) || '—'}</td>
                 <td title="${esc(l.email)}">${l.email ? `<a class="link" href="mailto:${esc(l.email)}">${esc(l.email)}</a>` : '—'}</td>
+                <td title="${esc(l.phone)}">${l.phone ? `<a class="link" href="tel:${esc(l.phone)}">${esc(l.phone)}</a>` : '—'}</td>
                 <td>${l.linkedin ? `<a class="link" href="${http(l.linkedin)}" target="_blank" rel="noopener">View ↗</a>` : '—'}</td>
                 <td title="${esc(l.company)}">${esc(l.company) || '—'}</td>
                 <td>${l.complin ? `<a class="link" href="${http(l.complin)}" target="_blank" rel="noopener">View ↗</a>` : '—'}</td>
@@ -1032,7 +1038,7 @@
     function openModal(id) {
         editId = id || null;
         document.getElementById('modalTitle').textContent = id ? 'Edit Lead' : 'Add New Lead';
-        const textFields = ['name','title','email','city','linkedin','company','website','complin','notes'];
+        const textFields = ['name','title','email','phone','city','linkedin','company','website','complin','notes'];
         if (id) {
             const l = leads.find(x => x.id === id);
             textFields.forEach(f => document.getElementById('f-'+f).value = l[f] || '');
@@ -1062,6 +1068,7 @@
             name:     document.getElementById('f-name').value.trim(),
             title:    document.getElementById('f-title').value.trim(),
             email:    document.getElementById('f-email').value.trim(),
+            phone:    document.getElementById('f-phone').value.trim(),
             city:     document.getElementById('f-city').value.trim(),
             linkedin: document.getElementById('f-linkedin').value.trim(),
             company:  document.getElementById('f-company').value.trim(),
@@ -1100,6 +1107,7 @@
                 name:    ['full name','fullname','name','first name','firstname','contact name'],
                 title:   ['job title','title','jobtitle','position','role'],
                 email:   ['email','email address','work email'],
+                phone:   ['phone','phone number','mobile','cell','telephone','tel'],
                 city:    ['city','location','region'],
                 linkedin:['linkedin url','linkedin','linkedin profile','person linkedin url'],
                 company: ['company name','company','organization','employer','account name'],
@@ -1122,6 +1130,7 @@
                     name:     idx.name    >= 0 ? (cols[idx.name]    || '').trim() : '',
                     title:    idx.title   >= 0 ? (cols[idx.title]   || '').trim() : '',
                     email:    idx.email   >= 0 ? (cols[idx.email]   || '').trim() : '',
+                    phone:    idx.phone   >= 0 ? (cols[idx.phone]   || '').trim() : '',
                     city:     idx.city    >= 0 ? (cols[idx.city]    || '').trim() : '',
                     linkedin: idx.linkedin>= 0 ? (cols[idx.linkedin]|| '').trim() : '',
                     company:  idx.company >= 0 ? (cols[idx.company] || '').trim() : '',
@@ -1169,9 +1178,9 @@
 
     function exportCSV() {
         if (!leads.length) { toast('No leads to export'); return; }
-        const H = ['Full Name','Job Title','Email','LinkedIn URL','Company Name','Company Website','Company LinkedIn','City','Notes','Outreach Channels'];
+        const H = ['Full Name','Job Title','Email','Phone','LinkedIn URL','Company Name','Company Website','Company LinkedIn','City','Notes','Outreach Channels'];
         const rows = leads.map(l => [
-            l.name, l.title, l.email, l.linkedin, l.company, l.website, l.complin, l.city, l.notes,
+            l.name, l.title, l.email, l.phone, l.linkedin, l.company, l.website, l.complin, l.city, l.notes,
             l.channels.length ? l.channels.join(', ') : 'Not Contacted'
         ].map(v => `"${(v||'').replace(/"/g,'""')}"`));
         const csv = [H.join(','), ...rows.map(r => r.join(','))].join('\n');
